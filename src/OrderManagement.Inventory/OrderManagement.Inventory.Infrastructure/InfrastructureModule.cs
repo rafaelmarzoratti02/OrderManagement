@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderManagement.Inventory.Infrastructure.Messaging;
+using OrderManagement.Inventory.Infrastructure.Persistence;
 using OrderManagement.Products.API.Infrastructure.Messaging;
 
 namespace OrderManagement.Inventory.Infrastructure;
@@ -10,7 +12,8 @@ public static class InfrastructureModule
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        
+        services.AddData(configuration)
+            .AddRabbitMq(configuration);
 
 
         return services;
@@ -22,6 +25,15 @@ public static class InfrastructureModule
         services.AddSingleton(rabbitMqSettings);
         services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
         
+        return services;
+    }
+    
+    private static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("InventoryDb");
+
+        services.AddDbContext<InventoryDbContext>(o => o.UseSqlServer(connectionString));
+
         return services;
     }
 

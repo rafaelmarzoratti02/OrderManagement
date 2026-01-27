@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OrderManagement.Inventory.Application.Events;
+using OrderManagement.Inventory.Application.Models;
 using OrderManagement.Inventory.Core.Entities;
 using OrderManagement.Inventory.Core.Events;
 using OrderManagement.Inventory.Infrastructure.Persistence;
@@ -46,6 +47,17 @@ public class InventoryService : IInventoryService
                 product.Quantity);
         }
 
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateStockItem(UpdateStockItemInputModel updateStockItemInputModel)
+    {
+        var stockItem = await _dbContext.StockItems.FirstOrDefaultAsync(s => s.Sku == updateStockItemInputModel.Sku);
+        if(stockItem == null)
+            throw new Exception($"Sku '{updateStockItemInputModel.Sku}' not found");
+        
+        stockItem.UpdateQuantity(updateStockItemInputModel.Quantity);
+        
         await _dbContext.SaveChangesAsync();
     }
 

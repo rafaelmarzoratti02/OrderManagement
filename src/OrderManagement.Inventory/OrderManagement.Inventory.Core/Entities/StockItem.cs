@@ -8,7 +8,12 @@ public class StockItem : BaseEntity
         Title = title;
         Quantity = quantity;
     }
-    public string Sku { get; private set; }
-    public string Title { get; private set; }
+    public string Sku { get; set; }
+    public string Title { get; set; }
     public int Quantity { get; set; }
+    
+    public void UpdateQuantity(int quantity)
+    {
+        Quantity = quantity;
+    }
 }

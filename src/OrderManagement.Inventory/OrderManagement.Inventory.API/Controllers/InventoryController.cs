@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OrderManagement.Inventory.Application.Models;
+using OrderManagement.Inventory.Application.Services;
 
 namespace OrderManagement.Inventory.API.Controllers;
 
@@ -6,9 +8,17 @@ namespace OrderManagement.Inventory.API.Controllers;
 [Route("api/inventory")]
 public class InventoryController : Controller
 {
-    [HttpPut("{productSku}")]
-    public async Task<IActionResult> Put(string productSku)
+    private readonly IInventoryService _inventoryService;
+
+    public InventoryController(IInventoryService inventoryService)
     {
-        return Ok();
+        _inventoryService = inventoryService;
+    }
+
+    [HttpPut("{productSku}")]
+    public async Task<IActionResult> Put(UpdateStockItemInputModel model)
+    {
+        await _inventoryService.UpdateStockItem(model);
+        return NoContent();
     }
 }
