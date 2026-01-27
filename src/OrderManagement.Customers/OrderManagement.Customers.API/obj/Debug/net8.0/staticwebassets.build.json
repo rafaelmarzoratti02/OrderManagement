@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "ANt1Hu3VoMWYVpN0iLbFRsS72NFvMKp4Gg7E7Iv9hKk=",
+  "Source": "OrderManagement.Customers.API",
+  "BasePath": "_content/OrderManagement.Customers.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
