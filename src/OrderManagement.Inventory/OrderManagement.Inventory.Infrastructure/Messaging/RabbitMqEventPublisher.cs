@@ -24,8 +24,7 @@ public class RabbitMqEventPublisher : IEventPublisher
 
         _connection = factory.CreateConnectionAsync().Result;
         _channel = _connection.CreateChannelAsync().Result;
-
-        // Declare both exchanges
+        
         _channel.ExchangeDeclareAsync(
             exchange: _settings.ExchangeName,
             type: ExchangeType.Topic,
@@ -58,13 +57,10 @@ public class RabbitMqEventPublisher : IEventPublisher
             mandatory: false,
             basicProperties: properties,
             body: body);
-
-        Console.WriteLine($"[Publisher] Published {eventName} to exchange {exchangeName} with routing key {routingKey}");
     }
 
     private string GetExchangeName(string eventName)
     {
-        // OrderInventoryValidated should be published to Orders exchange
         if (eventName.Contains("Order", StringComparison.OrdinalIgnoreCase))
         {
             return _settings.OrdersExchangeName;
