@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement.Inventory.API", "OrderManagement.Inventory.API\OrderManagement.Inventory.API.csproj", "{FBFE49DE-3DB3-473A-810A-29B6E5E8063A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement.Inventory.Application", "OrderManagement.Inventory.Application\OrderManagement.Inventory.Application.csproj", "{29CC1674-E44F-42E5-B5BA-53C9EF844FAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement.Inventory.Core", "OrderManagement.Inventory.Core\OrderManagement.Inventory.Core.csproj", "{9714EAA7-7BC0-473E-9CB1-07731CFD3B53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement.Inventory.Infrastructure", "OrderManagement.Inventory.Infrastructure\OrderManagement.Inventory.Infrastructure.csproj", "{69E95914-8D11-4DF3-A33F-93EB5C376403}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBFE49DE-3DB3-473A-810A-29B6E5E8063A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBFE49DE-3DB3-473A-810A-29B6E5E8063A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBFE49DE-3DB3-473A-810A-29B6E5E8063A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBFE49DE-3DB3-473A-810A-29B6E5E8063A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29CC1674-E44F-42E5-B5BA-53C9EF844FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29CC1674-E44F-42E5-B5BA-53C9EF844FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29CC1674-E44F-42E5-B5BA-53C9EF844FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29CC1674-E44F-42E5-B5BA-53C9EF844FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9714EAA7-7BC0-473E-9CB1-07731CFD3B53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9714EAA7-7BC0-473E-9CB1-07731CFD3B53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9714EAA7-7BC0-473E-9CB1-07731CFD3B53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9714EAA7-7BC0-473E-9CB1-07731CFD3B53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69E95914-8D11-4DF3-A33F-93EB5C376403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69E95914-8D11-4DF3-A33F-93EB5C376403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69E95914-8D11-4DF3-A33F-93EB5C376403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69E95914-8D11-4DF3-A33F-93EB5C376403}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
