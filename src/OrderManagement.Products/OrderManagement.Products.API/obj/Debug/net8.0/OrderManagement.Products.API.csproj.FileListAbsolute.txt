@@ -37,3 +37,4 @@ C:\Users\Devztti\source\repos\OrderManagement\src\OrderManagement.Products\Order
 C:\Users\Devztti\source\repos\OrderManagement\src\OrderManagement.Products\OrderManagement.Products.API\bin\Debug\net8.0\Snappier.dll
 C:\Users\Devztti\source\repos\OrderManagement\src\OrderManagement.Products\OrderManagement.Products.API\bin\Debug\net8.0\ZstdSharp.dll
 C:\Users\Devztti\source\repos\OrderManagement\src\OrderManagement.Products\OrderManagement.Products.API\bin\Debug\net8.0\RabbitMQ.Client.dll
+C:\Users\Devztti\source\repos\OrderManagement\src\OrderManagement.Products\OrderManagement.Products.API\obj\Debug\net8.0\OrderManagement.Products.API.sourcelink.json

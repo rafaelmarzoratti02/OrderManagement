@@ -1,8 +1,8 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 
-namespace OrderManagement.Inventory.Infrastructure.Messaging;
+namespace OrderManagement.Orders.Infrastructure.Messaging;
 
 public class RabbitMqEventPublisher : IEventPublisher
 {
@@ -25,16 +25,8 @@ public class RabbitMqEventPublisher : IEventPublisher
         _connection = factory.CreateConnectionAsync().Result;
         _channel = _connection.CreateChannelAsync().Result;
 
-        // Declare both exchanges
         _channel.ExchangeDeclareAsync(
             exchange: _settings.ExchangeName,
-            type: ExchangeType.Topic,
-            durable: true,
-            autoDelete: false
-        ).GetAwaiter().GetResult();
-
-        _channel.ExchangeDeclareAsync(
-            exchange: _settings.OrdersExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false
@@ -44,8 +36,7 @@ public class RabbitMqEventPublisher : IEventPublisher
     public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : class
     {
         var eventName = typeof(TEvent).Name;
-        var routingKey = eventName.ToLower().Replace("event", "");
-        var exchangeName = GetExchangeName(eventName);
+        var routingKey = GetRoutingKey(eventName);
 
         var message = JsonSerializer.Serialize(@event);
         var body = Encoding.UTF8.GetBytes(message);
@@ -53,23 +44,24 @@ public class RabbitMqEventPublisher : IEventPublisher
         var properties = new BasicProperties { Persistent = true };
 
         await _channel.BasicPublishAsync(
-            exchange: exchangeName,
+            exchange: _settings.ExchangeName,
             routingKey: routingKey,
             mandatory: false,
             basicProperties: properties,
             body: body);
 
-        Console.WriteLine($"[Publisher] Published {eventName} to exchange {exchangeName} with routing key {routingKey}");
+        Console.WriteLine($"[Publisher] Published {eventName} to exchange {_settings.ExchangeName} with routing key {routingKey}");
     }
 
-    private string GetExchangeName(string eventName)
+    private static string GetRoutingKey(string eventName)
     {
-        // OrderInventoryValidated should be published to Orders exchange
-        if (eventName.Contains("Order", StringComparison.OrdinalIgnoreCase))
+        // OrderCreatedEvent -> order.created
+        if (eventName.Equals("OrderCreatedEvent", StringComparison.OrdinalIgnoreCase))
         {
-            return _settings.OrdersExchangeName;
+            return "order.created";
         }
 
-        return _settings.ExchangeName;
+        // Default behavior: remove "Event" suffix and lowercase
+        return eventName.ToLower().Replace("event", "");
     }
 }

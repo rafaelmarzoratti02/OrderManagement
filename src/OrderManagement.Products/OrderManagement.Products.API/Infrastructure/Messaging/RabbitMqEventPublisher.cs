@@ -38,12 +38,16 @@ public class RabbitMqEventPublisher : IEventPublisher
         var eventName = typeof(TEvent).Name;
         var routingKey = eventName.ToLower().Replace("event", ""); 
 
-        var message = JsonSerializer.Serialize(@event); 
+        var message = JsonSerializer.Serialize(@event);
         var body = Encoding.UTF8.GetBytes(message);
+
+        var properties = new BasicProperties { Persistent = true };
 
         await _channel.BasicPublishAsync(
             exchange: _settings.ExchangeName,
             routingKey: routingKey,
+            mandatory: false,
+            basicProperties: properties,
             body: body);
         
         Console.WriteLine($"[Publisher] Published {eventName} to exchange {_settings.ExchangeName} with routing key {routingKey}");
