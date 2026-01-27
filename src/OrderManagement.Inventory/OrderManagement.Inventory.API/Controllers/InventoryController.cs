@@ -21,4 +21,11 @@ public class InventoryController : Controller
         await _inventoryService.UpdateStockItem(model);
         return NoContent();
     }
+    [HttpGet("{sku}")]
+    public async Task<IActionResult> GetBySku(string sku)
+    {
+        var model = await _inventoryService.GetStockItemBySku(sku);
+        return Ok(model);
+    }
+    
 }

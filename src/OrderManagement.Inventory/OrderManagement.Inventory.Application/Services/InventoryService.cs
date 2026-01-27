@@ -30,18 +30,11 @@ public class InventoryService : IInventoryService
         if (existingItem != null)
         {
             existingItem.Quantity += product.Quantity;
-            _logger.LogInformation("Updated existing StockItem SKU: {Sku}, New Quantity: {Quantity}",
-                product.Sku,
-                existingItem.Quantity);
         }
         else
         {
             var stockItem = new StockItem(product.Sku, product.Title, product.Quantity);
             await _dbContext.StockItems.AddAsync(stockItem);
-            _logger.LogInformation("Created new StockItem SKU: {Sku}, Name: {Name}, Quantity: {Quantity}",
-                product.Sku,
-                product.Title,
-                product.Quantity);
         }
 
         await _dbContext.SaveChangesAsync();
@@ -58,10 +51,19 @@ public class InventoryService : IInventoryService
         await _dbContext.SaveChangesAsync();
     }
 
+    public async  Task<StockItemViewModel> GetStockItemBySku(string sku)
+    {
+        var stockItem = await _dbContext.StockItems.FirstOrDefaultAsync(s => s.Sku == sku);
+        if(stockItem == null)
+            throw new Exception($"Sku '{sku}' not found");
+        
+        var model = StockItemViewModel.FromEntity(stockItem);
+        
+        return  model;
+    }
+
     public async Task ValidateOrderStockAsync(OrderCreatedEvent order)
     {
-        _logger.LogInformation("Validating stock for OrderId: {OrderId}", order.OrderId);
-
         var skus = order.Items.Select(i => i.Sku).ToList();
 
         var stockItems = await _dbContext.StockItems
