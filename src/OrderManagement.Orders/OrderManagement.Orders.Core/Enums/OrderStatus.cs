@@ -2,7 +2,7 @@ namespace OrderManagement.Orders.Core.Enums;
 
 public enum OrderStatus
 {
-    PENDENTE = 0,
-    APROVADO = 1,
-    SEM_ESTOQUE = 2
+    PENDING = 0,
+    APPROVED = 1,
+    OUT_OF_STOCK = 2
 }

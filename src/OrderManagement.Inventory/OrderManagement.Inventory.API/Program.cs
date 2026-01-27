@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using OrderManagement.Inventory.Application.Services;
 using OrderManagement.Inventory.Application.Subscribers;
 using OrderManagement.Inventory.Infrastructure;
@@ -10,7 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Inventory API",
+        Version = "v1",
+        Description = "Inventory control API"
+    });
+});
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<IInventoryService, InventoryService>();

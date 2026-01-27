@@ -6,7 +6,7 @@ public class Order : BaseEntity
 {
     public Order()
     {
-        Status = OrderStatus.PENDENTE;
+        Status = OrderStatus.PENDING;
         Items = new List<OrderItem>();
     }
 
@@ -18,13 +18,13 @@ public class Order : BaseEntity
 
     public void Approve()
     {
-        Status = OrderStatus.APROVADO;
+        Status = OrderStatus.APPROVED;
         UpdatedAt = DateTime.Now;
     }
 
     public void RejectDueToStock(string reason)
     {
-        Status = OrderStatus.SEM_ESTOQUE;
+        Status = OrderStatus.OUT_OF_STOCK;
         ValidationReason = reason;
         UpdatedAt = DateTime.Now;
     }

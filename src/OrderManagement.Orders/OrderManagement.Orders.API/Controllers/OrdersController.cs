@@ -26,7 +26,7 @@ public class OrdersController : ControllerBase
             return BadRequest("Order must contain at least one item");
         }
 
-        var order = await _orderService.CreateOrderAsync(inputModel);
+        var order = await _orderService.CreateOrder(inputModel);
 
         return CreatedAtAction(nameof(GetOrderById), new { id = order }, inputModel);
     }
@@ -34,7 +34,7 @@ public class OrdersController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult> GetOrderById(int id)
     {
-        var order = await _orderService.GetOrderByIdAsync(id);
+        var order = await _orderService.GetOrderById(id);
 
         if (order == null)
         {
@@ -47,7 +47,7 @@ public class OrdersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult> GetAllOrders()
     {
-        var orders = await _orderService.GetAllOrdersAsync();
+        var orders = await _orderService.GetAllOrders();
         return Ok(orders);
     }
 }

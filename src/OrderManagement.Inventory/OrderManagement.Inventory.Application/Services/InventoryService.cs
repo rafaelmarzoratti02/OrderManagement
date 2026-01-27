@@ -64,39 +64,68 @@ public class InventoryService : IInventoryService
 
     public async Task ValidateOrderStock(OrderCreatedEvent order)
     {
-        var skus = order.Items.Select(i => i.Sku).ToList();
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-        var stockItems = await _dbContext.StockItems
-            .Where(s => skus.Contains(s.Sku))
-            .ToListAsync();
-
-        var unavailableItems = new List<string>();
-
-        foreach (var orderItem in order.Items)
+        try
         {
-            var stockItem = stockItems.FirstOrDefault(s => s.Sku == orderItem.Sku);
+            var skus = order.Items.Select(i => i.Sku).ToList();
 
-            if (stockItem == null)
+            var stockItems = await _dbContext.StockItems
+                .Where(s => skus.Contains(s.Sku))
+                .ToListAsync();
+
+            var unavailableItems = new List<string>();
+
+            foreach (var orderItem in order.Items)
             {
-                unavailableItems.Add($"SKU '{orderItem.Sku}' not found");
-                continue;
+                var stockItem = stockItems.FirstOrDefault(s => s.Sku == orderItem.Sku);
+
+                if (stockItem == null)
+                {
+                    unavailableItems.Add($"SKU '{orderItem.Sku}' not found");
+                    continue;
+                }
+
+                if (stockItem.Quantity < orderItem.Quantity)
+                {
+                    unavailableItems.Add($"SKU '{orderItem.Sku}' insufficient stock (requested: {orderItem.Quantity}, available: {stockItem.Quantity})");
+                }
             }
 
-            if (stockItem.Quantity < orderItem.Quantity)
+            var isApproved = unavailableItems.Count == 0;
+
+            if (isApproved)
             {
-                unavailableItems.Add($"SKU '{orderItem.Sku}' insufficient stock (requested: {orderItem.Quantity}, available: {stockItem.Quantity})");
+                foreach (var orderItem in order.Items)
+                {
+                    var stockItem = stockItems.First(s => s.Sku == orderItem.Sku);
+                    stockItem.DecrementQuantity(orderItem.Quantity);
+                }
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("Stock decremented for OrderId: {OrderId}", order.OrderId);
             }
+            else
+            {
+                await transaction.RollbackAsync();
+            }
+
+            var @event = new OrderInventoryValidated
+            {
+                OrderId = order.OrderId,
+                IsApproved = isApproved,
+                Reason = isApproved ? null : string.Join("; ", unavailableItems)
+            };
+
+            await _eventPublisher.PublishAsync(@event);
         }
-
-        var isApproved = unavailableItems.Count == 0;
-
-        var @event = new OrderInventoryValidated
+        catch (Exception ex)
         {
-            OrderId = order.OrderId,
-            IsApproved = isApproved,
-            Reason = isApproved ? null : string.Join("; ", unavailableItems)
-        };
-
-        await _eventPublisher.PublishAsync(@event);
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error validating order stock for OrderId: {OrderId}", order.OrderId);
+            throw;
+        }
     }
 }

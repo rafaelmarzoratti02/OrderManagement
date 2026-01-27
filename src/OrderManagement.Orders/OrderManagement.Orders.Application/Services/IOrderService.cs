@@ -6,8 +6,8 @@ namespace OrderManagement.Orders.Application.Services;
 
 public interface IOrderService
 {
-    Task<int> CreateOrderAsync(CreateOrderInputModel inputModel);
-    Task<OrderViewModel?> GetOrderByIdAsync(int orderId);
-    Task<List<OrderViewModel>> GetAllOrdersAsync();
+    Task<int> CreateOrder(CreateOrderInputModel inputModel);
+    Task<OrderViewModel?> GetOrderById(int orderId);
+    Task<List<OrderViewModel>> GetAllOrders();
     Task UpdateOrderStatusAsync(OrderInventoryValidatedEvent validationResult);
 }

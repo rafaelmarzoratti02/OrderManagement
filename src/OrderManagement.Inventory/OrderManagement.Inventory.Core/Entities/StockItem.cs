@@ -16,4 +16,12 @@ public class StockItem : BaseEntity
     {
         Quantity = quantity;
     }
+
+    public void DecrementQuantity(int quantity)
+    {
+        if (Quantity < quantity)
+            throw new InvalidOperationException($"Insufficient stock for SKU '{Sku}'. Available: {Quantity}, Requested: {quantity}");
+
+        Quantity -= quantity;
+    }
 }

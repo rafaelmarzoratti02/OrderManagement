@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using OrderManagement.Orders.Application.Services;
 using OrderManagement.Orders.Application.Subscribers;
 using OrderManagement.Orders.Infrastructure.Messaging;
@@ -9,7 +10,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Orders API",
+        Version = "v1",
+        Description = "Order management API with stock validation"
+    });
+});
 
 
 builder.Services.AddDbContext<OrdersDbContext>(options =>

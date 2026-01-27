@@ -25,7 +25,7 @@ public class OrderService : IOrderService
         _logger = logger;
     }
 
-    public async Task<int> CreateOrderAsync(CreateOrderInputModel inputModel)
+    public async Task<int> CreateOrder(CreateOrderInputModel inputModel)
     {
         var order = new Order();
 
@@ -54,7 +54,7 @@ public class OrderService : IOrderService
         return order.Id;
     }
 
-    public async Task<OrderViewModel?> GetOrderByIdAsync(int orderId)
+    public async Task<OrderViewModel?> GetOrderById(int orderId)
     {
         var order = await _dbContext.Orders
             .Include(o => o.Items)
@@ -69,7 +69,7 @@ public class OrderService : IOrderService
         return MapToResponse(order);
     }
 
-    public async Task<List<OrderViewModel>> GetAllOrdersAsync()
+    public async Task<List<OrderViewModel>> GetAllOrders()
     {
         var orders = await _dbContext.Orders
             .Include(o => o.Items)
@@ -103,13 +103,13 @@ public class OrderService : IOrderService
         if (validationResult.IsApproved)
         {
             order.Approve();
-            _logger.LogInformation("Status: APROVADO");
+            _logger.LogInformation("Status: APPROVED");
             _logger.LogInformation("All items are available in stock.");
         }
         else
         {
             order.RejectDueToStock(validationResult.Reason ?? "Unknown reason");
-            _logger.LogWarning("Status: SEM_ESTOQUE");
+            _logger.LogWarning("Status: OUT_OF_STOCK");
             _logger.LogWarning("Items with validation errors:");
 
             var reasons = validationResult.Reason?.Split("; ") ?? Array.Empty<string>();
