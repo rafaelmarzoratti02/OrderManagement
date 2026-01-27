@@ -14,7 +14,8 @@ namespace OrderManagement.Inventory.Application.Subscribers;
 
 public class OrderCreatedSubscriber : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IEventPublisher _eventPublisher;
     private readonly ILogger<OrderCreatedSubscriber> _logger;
     private readonly RabbitMqSettings _settings;
     private IConnection? _connection;
@@ -22,11 +23,13 @@ public class OrderCreatedSubscriber : BackgroundService
     private const string RoutingKey = "order.created";
 
     public OrderCreatedSubscriber(
-        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory,
+        IEventPublisher eventPublisher,
         RabbitMqSettings settings,
         ILogger<OrderCreatedSubscriber> logger)
     {
-        _serviceProvider = serviceProvider;
+        _serviceScopeFactory = serviceScopeFactory;
+        _eventPublisher = eventPublisher;
         _settings = settings;
         _logger = logger;
     }
@@ -48,8 +51,6 @@ public class OrderCreatedSubscriber : BackgroundService
         await _channel.QueueDeclareAsync(_settings.OrderCreatedQueueName, durable: true, exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
         await _channel.QueueBindAsync(_settings.OrderCreatedQueueName, _settings.OrdersExchangeName, RoutingKey, cancellationToken: stoppingToken);
 
-        _logger.LogInformation("OrderCreatedSubscriber initialized. Listening on queue: {Queue}", _settings.OrderCreatedQueueName);
-
         var consumer = new AsyncEventingBasicConsumer(_channel);
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
@@ -62,21 +63,15 @@ public class OrderCreatedSubscriber : BackgroundService
 
                 if (orderEvent == null)
                 {
-                    _logger.LogWarning("Received null or invalid OrderCreatedEvent message");
                     await _channel.BasicNackAsync(eventArgs.DeliveryTag, false, false);
                     return;
                 }
 
-                _logger.LogInformation("Received OrderCreatedEvent for OrderId: {OrderId} with {ItemCount} items",
-                    orderEvent.OrderId,
-                    orderEvent.Items.Count);
-
-                using var scope = _serviceProvider.CreateScope();
+                using var scope = _serviceScopeFactory.CreateScope();
                 var inventoryService = scope.ServiceProvider.GetRequiredService<IInventoryService>();
-                var eventPublisher = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
 
                 var validationResult = await inventoryService.ValidateOrderStockAsync(orderEvent);
-                await eventPublisher.PublishAsync(validationResult);
+                await _eventPublisher.PublishAsync(validationResult);
 
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
 

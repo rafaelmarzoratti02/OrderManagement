@@ -21,12 +21,6 @@ public class InventoryService : IInventoryService
 
     public async Task AddStockItem(ProductCreatedEvent product)
     {
-        _logger.LogInformation("Processing ProductCreatedEvent - ProductId: {ProductId}, SKU: {Sku}, Name: {Name}, Quantity: {Quantity}",
-            product.ProductId,
-            product.Sku,
-            product.Title,
-            product.Quantity);
-
         var existingItem = await _dbContext.StockItems
             .FirstOrDefaultAsync(s => s.Sku == product.Sku);
 
