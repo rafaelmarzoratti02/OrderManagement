@@ -19,7 +19,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<OrderViewModel>> CreateOrder([FromBody] CreateOrderInputModel inputModel)
+    public async Task<ActionResult> CreateOrder([FromBody] CreateOrderInputModel inputModel)
     {
         if (inputModel.Items == null || inputModel.Items.Count == 0)
         {
@@ -32,7 +32,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<OrderViewModel>> GetOrderById(int id)
+    public async Task<ActionResult> GetOrderById(int id)
     {
         var order = await _orderService.GetOrderByIdAsync(id);
 
@@ -45,7 +45,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<OrderViewModel>>> GetAllOrders()
+    public async Task<ActionResult> GetAllOrders()
     {
         var orders = await _orderService.GetAllOrdersAsync();
         return Ok(orders);
