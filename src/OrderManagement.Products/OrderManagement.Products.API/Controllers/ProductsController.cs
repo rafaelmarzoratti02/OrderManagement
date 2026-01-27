@@ -15,6 +15,13 @@ public class ProductsController : Controller
     {
         _productService = productService;
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var model = await _productService.GetAll();
+        return Ok(model);
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)

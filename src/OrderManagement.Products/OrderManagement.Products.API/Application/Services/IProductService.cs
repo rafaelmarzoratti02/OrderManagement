@@ -6,6 +6,8 @@ namespace OrderManagement.Products.API.Application.Services;
 public interface IProductService
 {
     Task<Guid> CreateProduct(CreateProductInputModel model);
-    Task<ProductViewModel> GetProductById(Guid id);
+    Task<ProductViewModel?> GetProductById(Guid id);
+    Task<List<ProductViewModel>> GetAll();
+    
 }
 

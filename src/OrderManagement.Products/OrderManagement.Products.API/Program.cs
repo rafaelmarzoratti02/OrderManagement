@@ -1,3 +1,4 @@
+using Microsoft.OpenApi.Models;
 using OrderManagement.Products.API.Application.Services;
 using OrderManagement.Products.API.Infrastructure;
 using OrderManagement.Products.API.Infrastructure.Messaging;
@@ -8,7 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Products API",
+        Version = "v1",
+        Description = "Product catalog API"
+    });
+});
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTransient<IProductService, ProductService>();
 

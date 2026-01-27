@@ -29,8 +29,24 @@ public class ProductService : IProductService
         return product.Id;
     }
 
-    public Task<ProductViewModel> GetProductById(Guid id)
+    public async Task<ProductViewModel?> GetProductById(Guid id)
     {
-        throw new NotImplementedException();
+        var product = await _context.Products
+            .Find(x => x.Id == id)
+            .FirstOrDefaultAsync();
+
+        if (product is null)
+            return null;
+
+        return ProductViewModel.FromEntity(product);
+    }
+
+    public async Task<List<ProductViewModel>> GetAll()
+    {
+        var products = await _context.Products
+            .Find(_ => true)
+            .ToListAsync();
+
+        return products.Select(ProductViewModel.FromEntity).ToList();
     }
 }
