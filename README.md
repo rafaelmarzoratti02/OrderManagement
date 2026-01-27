@@ -1,4 +1,5 @@
 # OrderManagement - Order Management System
+<img width="1871" height="1061" alt="OrderManagement" src="https://github.com/user-attachments/assets/52ce7101-554d-4b69-983c-bf6ff4a67b31" />
 
 Microservices system for order management with rigorous stock validation.
 
