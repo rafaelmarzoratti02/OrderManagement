@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using OrderManagement.Inventory.Application.Events;
 using OrderManagement.Inventory.Application.Services;
 using OrderManagement.Inventory.Infrastructure.Messaging;
-using OrderManagement.Products.API.Infrastructure.Messaging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -15,7 +14,6 @@ namespace OrderManagement.Inventory.Application.Subscribers;
 public class OrderCreatedSubscriber : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IEventPublisher _eventPublisher;
     private readonly ILogger<OrderCreatedSubscriber> _logger;
     private readonly RabbitMqSettings _settings;
     private IConnection? _connection;
@@ -24,12 +22,10 @@ public class OrderCreatedSubscriber : BackgroundService
 
     public OrderCreatedSubscriber(
         IServiceScopeFactory serviceScopeFactory,
-        IEventPublisher eventPublisher,
         RabbitMqSettings settings,
         ILogger<OrderCreatedSubscriber> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
-        _eventPublisher = eventPublisher;
         _settings = settings;
         _logger = logger;
     }
@@ -70,14 +66,11 @@ public class OrderCreatedSubscriber : BackgroundService
                 using var scope = _serviceScopeFactory.CreateScope();
                 var inventoryService = scope.ServiceProvider.GetRequiredService<IInventoryService>();
 
-                var validationResult = await inventoryService.ValidateOrderStockAsync(orderEvent);
-                await _eventPublisher.PublishAsync(validationResult);
+                await inventoryService.ValidateOrderStockAsync(orderEvent);
 
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
 
-                _logger.LogInformation("Processed OrderCreatedEvent for OrderId: {OrderId}, Result: {Result}",
-                    orderEvent.OrderId,
-                    validationResult.IsApproved ? "APPROVED" : "REJECTED");
+                _logger.LogInformation("Processed OrderCreatedEvent for OrderId: {OrderId}", orderEvent.OrderId);
             }
             catch (Exception ex)
             {

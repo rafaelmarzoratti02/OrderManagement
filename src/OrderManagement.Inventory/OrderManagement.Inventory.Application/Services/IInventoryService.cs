@@ -6,7 +6,7 @@ namespace OrderManagement.Inventory.Application.Services;
 
 public interface IInventoryService
 {
-    Task<OrderInventoryValidated> ValidateOrderStockAsync(OrderCreatedEvent order);
+    Task ValidateOrderStockAsync(OrderCreatedEvent order);
     Task AddStockItem(ProductCreatedEvent product);
     Task UpdateStockItem(UpdateStockItemInputModel  updateStockItemInputModel);
 }

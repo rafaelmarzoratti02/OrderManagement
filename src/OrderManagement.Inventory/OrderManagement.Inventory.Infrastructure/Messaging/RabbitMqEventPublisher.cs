@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json;
-using OrderManagement.Products.API.Infrastructure.Messaging;
 using RabbitMQ.Client;
 
 namespace OrderManagement.Inventory.Infrastructure.Messaging;

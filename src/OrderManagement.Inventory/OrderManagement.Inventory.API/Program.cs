@@ -4,7 +4,6 @@ using OrderManagement.Inventory.Application.Subscribers;
 using OrderManagement.Inventory.Infrastructure;
 using OrderManagement.Inventory.Infrastructure.Messaging;
 using OrderManagement.Inventory.Infrastructure.Persistence;
-using OrderManagement.Products.API.Infrastructure.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 

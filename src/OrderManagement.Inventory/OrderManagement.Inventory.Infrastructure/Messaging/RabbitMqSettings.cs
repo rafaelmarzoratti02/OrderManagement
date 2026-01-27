@@ -1,4 +1,4 @@
-namespace OrderManagement.Products.API.Infrastructure.Messaging;
+namespace OrderManagement.Inventory.Infrastructure.Messaging;
 
 public class RabbitMqSettings
 {

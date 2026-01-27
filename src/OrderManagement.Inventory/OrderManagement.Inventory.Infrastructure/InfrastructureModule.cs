@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderManagement.Inventory.Infrastructure.Messaging;
 using OrderManagement.Inventory.Infrastructure.Persistence;
-using OrderManagement.Products.API.Infrastructure.Messaging;
 
 namespace OrderManagement.Inventory.Infrastructure;
 

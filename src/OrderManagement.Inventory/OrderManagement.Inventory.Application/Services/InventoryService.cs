@@ -4,6 +4,7 @@ using OrderManagement.Inventory.Application.Events;
 using OrderManagement.Inventory.Application.Models;
 using OrderManagement.Inventory.Core.Entities;
 using OrderManagement.Inventory.Core.Events;
+using OrderManagement.Inventory.Infrastructure.Messaging;
 using OrderManagement.Inventory.Infrastructure.Persistence;
 
 namespace OrderManagement.Inventory.Application.Services;
@@ -11,11 +12,13 @@ namespace OrderManagement.Inventory.Application.Services;
 public class InventoryService : IInventoryService
 {
     private readonly InventoryDbContext _dbContext;
+    private readonly IEventPublisher _eventPublisher;
     private readonly ILogger<InventoryService> _logger;
 
-    public InventoryService(InventoryDbContext dbContext, ILogger<InventoryService> logger)
+    public InventoryService(InventoryDbContext dbContext, IEventPublisher eventPublisher, ILogger<InventoryService> logger)
     {
         _dbContext = dbContext;
+        _eventPublisher = eventPublisher;
         _logger = logger;
     }
 
@@ -55,7 +58,7 @@ public class InventoryService : IInventoryService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<OrderInventoryValidated> ValidateOrderStockAsync(OrderCreatedEvent order)
+    public async Task ValidateOrderStockAsync(OrderCreatedEvent order)
     {
         _logger.LogInformation("Validating stock for OrderId: {OrderId}", order.OrderId);
 
@@ -85,19 +88,13 @@ public class InventoryService : IInventoryService
 
         var isApproved = unavailableItems.Count == 0;
 
-        var result = new OrderInventoryValidated
+        var @event = new OrderInventoryValidated
         {
             OrderId = order.OrderId,
             IsApproved = isApproved,
             Reason = isApproved ? null : string.Join("; ", unavailableItems)
         };
 
-        _logger.LogInformation(
-            "Stock validation completed for OrderId: {OrderId}, IsApproved: {IsApproved}, Reason: {Reason}",
-            order.OrderId,
-            result.IsApproved,
-            result.Reason ?? "N/A");
-
-        return result;
+        await _eventPublisher.PublishAsync(@event);
     }
 }

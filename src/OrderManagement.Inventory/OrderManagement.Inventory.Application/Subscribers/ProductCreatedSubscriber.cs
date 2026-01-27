@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OrderManagement.Inventory.Application.Events;
 using OrderManagement.Inventory.Application.Services;
-using OrderManagement.Products.API.Infrastructure.Messaging;
+using OrderManagement.Inventory.Infrastructure.Messaging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
