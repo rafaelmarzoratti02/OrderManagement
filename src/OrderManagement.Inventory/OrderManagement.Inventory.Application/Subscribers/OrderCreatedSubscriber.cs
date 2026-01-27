@@ -66,7 +66,7 @@ public class OrderCreatedSubscriber : BackgroundService
                 using var scope = _serviceScopeFactory.CreateScope();
                 var inventoryService = scope.ServiceProvider.GetRequiredService<IInventoryService>();
 
-                await inventoryService.ValidateOrderStockAsync(orderEvent);
+                await inventoryService.ValidateOrderStock(orderEvent);
 
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
 

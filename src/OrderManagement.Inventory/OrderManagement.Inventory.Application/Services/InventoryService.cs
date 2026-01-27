@@ -62,7 +62,7 @@ public class InventoryService : IInventoryService
         return  model;
     }
 
-    public async Task ValidateOrderStockAsync(OrderCreatedEvent order)
+    public async Task ValidateOrderStock(OrderCreatedEvent order)
     {
         var skus = order.Items.Select(i => i.Sku).ToList();
 
