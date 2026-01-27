@@ -10,6 +10,12 @@ services:
     volumes:
       - sqlserver_data:/var/opt/mssql
     restart: unless-stopped
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Order@123456" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   mongodb:
     image: mongo:7
@@ -19,7 +25,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=OrderManagement
+      - MONGO_INITDB_DATABASE=OrderManagementProducts
     restart: unless-stopped
 
   mongo-express:
@@ -72,7 +78,7 @@ services:
       - RabbitMq__ValidationResultQueueName=orders-validation-result-queue
     depends_on:
       sqlserver:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
@@ -86,7 +92,7 @@ services:
       - "5002:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=InventoryDb;User Id=sa;Password=Order@123456;TrustServerCertificate=True
+      - ConnectionStrings__InventoryDb=Server=sqlserver;Database=InventoryDb;User Id=sa;Password=Order@123456;TrustServerCertificate=True
       - RabbitMq__HostName=rabbitmq
       - RabbitMq__Port=5672
       - RabbitMq__UserName=guest
@@ -98,7 +104,7 @@ services:
       - RabbitMq__OrderValidationResultQueueName=orders-validation-result-queue
     depends_on:
       sqlserver:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
@@ -113,7 +119,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
-      - MongoDbSettings__DatabaseName=OrderManagement
+      - MongoDbSettings__DatabaseName=OrderManagementProducts
       - RabbitMq__HostName=rabbitmq
       - RabbitMq__Port=5672
       - RabbitMq__UserName=guest

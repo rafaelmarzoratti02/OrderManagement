@@ -20,6 +20,16 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 
 builder.Services.AddDbContext<OrdersDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -35,14 +45,44 @@ builder.Services.AddHostedService<OrderValidationResultSubscriber>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    var maxRetries = 10;
+    var delay = TimeSpan.FromSeconds(5);
+
+    for (int i = 0; i < maxRetries; i++)
+    {
+        try
+        {
+            logger.LogInformation("Applying database migrations...");
+            dbContext.Database.Migrate();
+            logger.LogInformation("Database migrations applied successfully.");
+            break;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("Database not ready (attempt {Attempt}/{MaxRetries}): {Message}", i + 1, maxRetries, ex.Message);
+            if (i == maxRetries - 1) throw;
+            Thread.Sleep(delay);
+        }
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
+app.UseCors();
 
 app.UseAuthorization();
 

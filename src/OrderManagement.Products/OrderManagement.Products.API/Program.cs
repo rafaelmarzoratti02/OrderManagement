@@ -18,6 +18,17 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Product catalog API"
     });
 });
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTransient<IProductService, ProductService>();
 
@@ -37,8 +48,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
+app.UseCors();
 
 app.UseAuthorization();
 
