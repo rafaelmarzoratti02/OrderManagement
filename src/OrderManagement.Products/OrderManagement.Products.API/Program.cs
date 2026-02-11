@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using OrderManagement.Products.API.Application.Services;
+using OrderManagement.Products.API.HealthChecks;
 using OrderManagement.Products.API.Infrastructure;
 using OrderManagement.Products.API.Infrastructure.Messaging;
 using OrderManagement.Products.API.Infrastructure.Persistence;
@@ -32,6 +33,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddTransient<IProductService, ProductService>();
 
+builder.Services.AddHealthChecks()
+    .AddCheck<MongoDbHealthCheck>("products_mongo")
+    .AddCheck<RabbitMqHealthCheck>("products_rabbitmq");
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -58,5 +63,7 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -70,6 +70,11 @@ public class ProductCreatedSubscriber : BackgroundService
 
                 await inventoryService.AddStockItem(message);
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
+
+                _logger.LogInformation(
+                    "Processed ProductCreatedEvent. Sku: {Sku}, Quantity: {Quantity}",
+                    message.Sku,
+                    message.Quantity);
             }
             catch (Exception ex)
             {

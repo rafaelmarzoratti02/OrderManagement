@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using OrderManagement.Inventory.Application.Exceptions;
 
 namespace OrderManagement.Inventory.API.Middleware;
@@ -7,11 +8,13 @@ namespace OrderManagement.Inventory.API.Middleware;
 public sealed class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
-    public ExceptionHandlingMiddleware(RequestDelegate next)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -26,7 +29,7 @@ public sealed class ExceptionHandlingMiddleware
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var statusCode = HttpStatusCode.InternalServerError;
         string title = "An unexpected error occurred.";
@@ -39,6 +42,12 @@ public sealed class ExceptionHandlingMiddleware
                 title = "Stock item not found.";
                 break;
         }
+
+        _logger.LogError(
+            exception,
+            "Unhandled exception caught by middleware. StatusCode: {StatusCode}, Title: {Title}",
+            (int)statusCode,
+            title);
 
         var problemDetails = new
         {

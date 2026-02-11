@@ -59,6 +59,7 @@ public class OrderCreatedSubscriber : BackgroundService
 
                 if (orderEvent == null)
                 {
+                    _logger.LogWarning("Received null or invalid OrderCreatedEvent message");
                     await _channel.BasicNackAsync(eventArgs.DeliveryTag, false, false);
                     return;
                 }
@@ -70,7 +71,10 @@ public class OrderCreatedSubscriber : BackgroundService
 
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, false);
 
-                _logger.LogInformation("Processed OrderCreatedEvent for OrderId: {OrderId}", orderEvent.OrderId);
+                _logger.LogInformation(
+                    "Processed OrderCreatedEvent. OrderId: {OrderId}, ItemCount: {ItemCount}",
+                    orderEvent.OrderId,
+                    orderEvent.Items.Count);
             }
             catch (Exception ex)
             {

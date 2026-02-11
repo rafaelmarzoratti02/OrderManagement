@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using OrderManagement.Orders.API.HealthChecks;
 using OrderManagement.Orders.Application.Services;
 using OrderManagement.Orders.Application.Subscribers;
 using OrderManagement.Orders.Infrastructure.Messaging;
@@ -42,6 +43,10 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
 
 builder.Services.AddHostedService<OrderValidationResultSubscriber>();
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<OrdersDbContext>("orders_db")
+    .AddCheck<RabbitMqHealthCheck>("rabbitmq");
 
 var app = builder.Build();
 
@@ -87,5 +92,7 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

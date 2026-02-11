@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 using OrderManagement.Products.API.Application.Models;
 using OrderManagement.Products.API.Entities.Events;
 using OrderManagement.Products.API.Infrastructure.Messaging;
@@ -10,11 +11,13 @@ public class ProductService : IProductService
 {
     private readonly MongoDbContext _context;
     private readonly IEventPublisher  _eventPublisher;
+    private readonly ILogger<ProductService> _logger;
     
-    public ProductService(MongoDbContext context, IEventPublisher eventPublisher)
+    public ProductService(MongoDbContext context, IEventPublisher eventPublisher, ILogger<ProductService> logger)
     {
         _context = context;
         _eventPublisher = eventPublisher;
+        _logger = logger;
     }
     
     public async Task<Guid> CreateProduct(CreateProductInputModel model)
@@ -23,9 +26,14 @@ public class ProductService : IProductService
         await _context.Products.InsertOneAsync(product);
 
         var @event = new ProductCreatedEvent(product.Sku, product.Quantity, product.Title);
-        
+
         await _eventPublisher.PublishAsync(@event);
-        
+
+        _logger.LogInformation(
+            "Product created and ProductCreatedEvent published. ProductId: {ProductId}, Sku: {Sku}",
+            product.Id,
+            product.Sku);
+
         return product.Id;
     }
 
