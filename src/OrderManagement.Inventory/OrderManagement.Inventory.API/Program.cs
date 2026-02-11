@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using OrderManagement.Inventory.API.Middleware;
 using OrderManagement.Inventory.Application.Services;
 using OrderManagement.Inventory.Application.Subscribers;
 using OrderManagement.Inventory.Infrastructure;
@@ -66,7 +67,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -76,7 +78,6 @@ else
 {
     app.UseHttpsRedirection();
 }
-
 app.UseCors();
 
 app.UseAuthorization();

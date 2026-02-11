@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OrderManagement.Inventory.Application.Events;
+using OrderManagement.Inventory.Application.Exceptions;
 using OrderManagement.Inventory.Application.Models;
 using OrderManagement.Inventory.Core.Entities;
 using OrderManagement.Inventory.Core.Events;
@@ -43,8 +44,10 @@ public class InventoryService : IInventoryService
     public async Task UpdateStockItem(UpdateStockItemInputModel updateStockItemInputModel)
     {
         var stockItem = await _dbContext.StockItems.FirstOrDefaultAsync(s => s.Sku == updateStockItemInputModel.Sku);
-        if(stockItem == null)
-            throw new Exception($"Sku '{updateStockItemInputModel.Sku}' not found");
+        if (stockItem == null)
+        {
+            throw new StockItemNotFoundException(updateStockItemInputModel.Sku);
+        }
         
         stockItem.UpdateQuantity(updateStockItemInputModel.Quantity);
         
