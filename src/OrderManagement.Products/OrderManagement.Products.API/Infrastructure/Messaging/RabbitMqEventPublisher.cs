@@ -1,40 +1,46 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 
 namespace OrderManagement.Products.API.Infrastructure.Messaging;
 
-public class RabbitMqEventPublisher : IEventPublisher
+public class RabbitMqEventPublisher : IEventPublisher, IDisposable
 {
     private readonly RabbitMqSettings _settings;
     private readonly IConnection _connection;
     private readonly IChannel _channel;
+    private bool _disposed;
 
     public RabbitMqEventPublisher(RabbitMqSettings settings)
     {
         _settings = settings;
 
-        var factory = new ConnectionFactory()
+        var factory = new ConnectionFactory
         {
             HostName = _settings.HostName,
             Port = _settings.Port,
             UserName = _settings.UserName,
-            Password = _settings.Password,
+            Password = _settings.Password
         };
 
-        _connection = factory.CreateConnectionAsync().Result;
-        _channel = _connection.CreateChannelAsync().Result;
-        
-        _channel.ExchangeDeclareAsync(
+        _connection = factory.CreateConnection("products-service-publisher");
+        _channel = _connection.CreateChannel();
+
+        _channel.ExchangeDeclare(
             exchange: _settings.ExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false
-        ).GetAwaiter().GetResult();
+        );
     }
     
     public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : class
     {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(RabbitMqEventPublisher));
+        }
+
         var eventName = typeof(TEvent).Name;
         var routingKey = eventName.ToLower().Replace("event", ""); 
 
@@ -51,5 +57,16 @@ public class RabbitMqEventPublisher : IEventPublisher
             body: body);
         
         Console.WriteLine($"[Publisher] Published {eventName} to exchange {_settings.ExchangeName} with routing key {routingKey}");
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        _channel?.Dispose();
+        _connection?.Dispose();
+
+        _disposed = true;
+        GC.SuppressFinalize(this);
     }
 }

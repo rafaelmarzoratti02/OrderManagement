@@ -4,37 +4,43 @@ using RabbitMQ.Client;
 
 namespace OrderManagement.Orders.Infrastructure.Messaging;
 
-public class RabbitMqEventPublisher : IEventPublisher
+public class RabbitMqEventPublisher : IEventPublisher, IDisposable
 {
     private readonly RabbitMqSettings _settings;
     private readonly IConnection _connection;
     private readonly IChannel _channel;
+    private bool _disposed;
 
     public RabbitMqEventPublisher(RabbitMqSettings settings)
     {
         _settings = settings;
 
-        var factory = new ConnectionFactory()
+        var factory = new ConnectionFactory
         {
             HostName = _settings.HostName,
             Port = _settings.Port,
             UserName = _settings.UserName,
-            Password = _settings.Password,
+            Password = _settings.Password
         };
 
-        _connection = factory.CreateConnectionAsync().Result;
-        _channel = _connection.CreateChannelAsync().Result;
+        _connection = factory.CreateConnection("orders-service-publisher");
+        _channel = _connection.CreateChannel();
 
-        _channel.ExchangeDeclareAsync(
+        _channel.ExchangeDeclare(
             exchange: _settings.ExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false
-        ).GetAwaiter().GetResult();
+        );
     }
 
     public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : class
     {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(RabbitMqEventPublisher));
+        }
+
         var eventName = typeof(TEvent).Name;
         var routingKey = GetRoutingKey(eventName);
 
@@ -55,13 +61,22 @@ public class RabbitMqEventPublisher : IEventPublisher
 
     private static string GetRoutingKey(string eventName)
     {
-        // OrderCreatedEvent -> order.created
         if (eventName.Equals("OrderCreatedEvent", StringComparison.OrdinalIgnoreCase))
         {
             return "order.created";
         }
 
-        // Default behavior: remove "Event" suffix and lowercase
         return eventName.ToLower().Replace("event", "");
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        _channel?.Dispose();
+        _connection?.Dispose();
+
+        _disposed = true;
+        GC.SuppressFinalize(this);
     }
 }

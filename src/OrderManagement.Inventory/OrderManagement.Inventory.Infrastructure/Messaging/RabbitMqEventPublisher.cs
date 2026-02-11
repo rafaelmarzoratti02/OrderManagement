@@ -1,14 +1,15 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 
 namespace OrderManagement.Inventory.Infrastructure.Messaging;
 
-public class RabbitMqEventPublisher : IEventPublisher
+public class RabbitMqEventPublisher : IEventPublisher, IDisposable
 {
     private readonly RabbitMqSettings _settings;
     private readonly IConnection _connection;
     private readonly IChannel _channel;
+    private bool _disposed;
 
     public RabbitMqEventPublisher(RabbitMqSettings settings)
     {
@@ -19,29 +20,34 @@ public class RabbitMqEventPublisher : IEventPublisher
             HostName = _settings.HostName,
             Port = _settings.Port,
             UserName = _settings.UserName,
-            Password = _settings.Password,
+            Password = _settings.Password
         };
 
-        _connection = factory.CreateConnectionAsync().Result;
-        _channel = _connection.CreateChannelAsync().Result;
-        
-        _channel.ExchangeDeclareAsync(
+        _connection = factory.CreateConnection("inventory-service-publisher");
+        _channel = _connection.CreateChannel();
+
+        _channel.ExchangeDeclare(
             exchange: _settings.ExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false
-        ).GetAwaiter().GetResult();
+        );
 
-        _channel.ExchangeDeclareAsync(
+        _channel.ExchangeDeclare(
             exchange: _settings.OrdersExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false
-        ).GetAwaiter().GetResult();
+        );
     }
 
     public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : class
     {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(RabbitMqEventPublisher));
+        }
+
         var eventName = typeof(TEvent).Name;
         var routingKey = eventName.ToLower().Replace("event", "");
         var exchangeName = GetExchangeName(eventName);
@@ -67,5 +73,16 @@ public class RabbitMqEventPublisher : IEventPublisher
         }
 
         return _settings.ExchangeName;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        _channel?.Dispose();
+        _connection?.Dispose();
+
+        _disposed = true;
+        GC.SuppressFinalize(this);
     }
 }
