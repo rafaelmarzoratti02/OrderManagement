@@ -26,9 +26,10 @@ public class OrdersController : ControllerBase
             return BadRequest("Order must contain at least one item");
         }
 
-        var order = await _orderService.CreateOrder(inputModel);
+        var orderId = await _orderService.CreateOrder(inputModel);
+        var order = await _orderService.GetOrderById(orderId);
 
-        return CreatedAtAction(nameof(GetOrderById), new { id = order }, inputModel);
+        return CreatedAtAction(nameof(GetOrderById), new { id = orderId }, order);
     }
 
     [HttpGet("{id:int}")]

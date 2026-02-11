@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using OrderManagement.Inventory.Application.Models;
 using OrderManagement.Inventory.Application.Services;
 
@@ -25,6 +25,12 @@ public class InventoryController : Controller
     public async Task<IActionResult> GetBySku(string sku)
     {
         var model = await _inventoryService.GetStockItemBySku(sku);
+
+        if (model is null)
+        {
+            return NotFound();
+        }
+
         return Ok(model);
     }
     

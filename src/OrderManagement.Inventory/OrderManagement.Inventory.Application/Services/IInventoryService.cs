@@ -9,5 +9,5 @@ public interface IInventoryService
     Task ValidateOrderStock(OrderCreatedEvent order);
     Task AddStockItem(ProductCreatedEvent product);
     Task UpdateStockItem(UpdateStockItemInputModel  updateStockItemInputModel);
-    Task<StockItemViewModel> GetStockItemBySku(string sku);
+    Task<StockItemViewModel?> GetStockItemBySku(string sku);
 }

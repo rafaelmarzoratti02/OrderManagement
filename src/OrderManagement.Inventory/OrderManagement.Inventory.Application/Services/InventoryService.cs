@@ -51,14 +51,16 @@ public class InventoryService : IInventoryService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async  Task<StockItemViewModel> GetStockItemBySku(string sku)
+    public async  Task<StockItemViewModel?> GetStockItemBySku(string sku)
     {
         var stockItem = await _dbContext.StockItems.FirstOrDefaultAsync(s => s.Sku == sku);
         if(stockItem == null)
-            throw new Exception($"Sku '{sku}' not found");
-        
+        {
+            return null;
+        }
+
         var model = StockItemViewModel.FromEntity(stockItem);
-        
+
         return  model;
     }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using OrderManagement.Products.API.Application.Models;
 using OrderManagement.Products.API.Application.Services;
 
@@ -27,6 +27,12 @@ public class ProductsController : Controller
     public async Task<IActionResult> GetById(Guid id)
     {
         var model = await _productService.GetProductById(id);
+
+        if (model is null)
+        {
+            return NotFound();
+        }
+
         return Ok(model);
     }
     
@@ -34,6 +40,6 @@ public class ProductsController : Controller
     public async Task<IActionResult> Post(CreateProductInputModel model)
     {
         var id = await _productService.CreateProduct(model);
-        return Created();
+        return CreatedAtAction(nameof(GetById), new { id }, null);
     }
 }
