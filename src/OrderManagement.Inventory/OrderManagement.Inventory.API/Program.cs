@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using OrderManagement.Inventory.API.HealthChecks;
 using OrderManagement.Inventory.API.Middleware;
 using OrderManagement.Inventory.Application.Services;
 using OrderManagement.Inventory.Application.Subscribers;
@@ -38,6 +39,10 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 builder.Services.AddHostedService<ProductCreatedSubscriber>();
 builder.Services.AddHostedService<OrderCreatedSubscriber>();
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<InventoryDbContext>("inventory_db")
+    .AddCheck<RabbitMqHealthCheck>("rabbitmq");
 
 var app = builder.Build();
 
@@ -83,6 +88,8 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();
 
